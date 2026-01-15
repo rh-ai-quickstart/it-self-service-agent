@@ -2,7 +2,7 @@
 Helper modules for deepeval conversation evaluation system.
 
 This package contains:
-- custom_llm: Custom LLM implementation for non-OpenAI endpoints
+- custom_llm: Custom LLM implementation for non-OpenAI endpoints (supports structured output mode)
 - openshift_chat_client: OpenShift chat client functionality
 - run_conversation_flow: Conversation flow testing utilities
 """
