@@ -1606,7 +1606,7 @@ wheels = [
 
 [[package]]
 name = "llama-stack-client"
-version = "0.5.0"
+version = "0.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -1625,9 +1625,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/af/a1/1bd9ed2b6982fb1edf0215be1a4569eb65c9354b86bfdcb5b1414b489162/llama_stack_client-0.5.0.tar.gz", hash = "sha256:e005ae9d975cda30b3b86261057f228d700107e263e12b796b920cd1fb9ba968", size = 368629, upload-time = "2026-02-05T17:23:06.688Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/19/01/47b32f2fb003b7f3fc24a401cd7b091892025f626dd07661647f64e3df68/llama_stack_client-0.6.1.tar.gz", hash = "sha256:13dabd74c29d5159cdcfca5a9e6f99c99f08aa688fa8403d6c5f6042b61519d2", size = 368690, upload-time = "2026-03-30T13:11:39.597Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2d/93/63b434955cdb80d54c69bdb51ecd1a12595451ce238667fdaa125fb7d1ec/llama_stack_client-0.5.0-py3-none-any.whl", hash = "sha256:5e7272c7fb58cd169985191c42af78dc6c4d212b7050949b063788bfb9e7ed36", size = 391950, upload-time = "2026-02-05T17:23:04.238Z" },
+    { url = "https://files.pythonhosted.org/packages/57/bd/da2f43993b9b753f0465548b17efbbee492a6980fdd5e14fadf8566cdb1f/llama_stack_client-0.6.1-py3-none-any.whl", hash = "sha256:47aa4f47b591ffbd35b7be946552c4198006daaf57505898372d7bc7c1df510f", size = 391998, upload-time = "2026-03-30T13:11:38.067Z" },
 ]
 
 [[package]]
@@ -3336,7 +3336,7 @@ requires-dist = [
     { name = "langfuse", specifier = ">=3.0.0" },
     { name = "langgraph", specifier = "==1.0.7" },
     { name = "langgraph-checkpoint-postgres", specifier = ">=2.0.0" },
-    { name = "llama-stack-client", specifier = "==0.5.0" },
+    { name = "llama-stack-client", specifier = "==0.6.1" },
     { name = "mlflow", specifier = ">=2.14.0" },
     { name = "openai", specifier = ">=1.0.0" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.37.0" },
