@@ -179,7 +179,7 @@ helm_llama_stack_args = \
     $(if $(LLM_ID),--set global.models.$(LLM).id='$(LLM_ID)',) \
     $(if $(LLM),--set global.models.$(LLM).maxTokens=$(LLM_MAX_TOKENS),) \
     $(if $(LLM_API_TOKEN),--set global.models.$(LLM).apiToken='$(LLM_API_TOKEN)',) \
-    $(if $(LLAMA_STACK_ENV),--set-json llama-stack.secrets='$(LLAMA_STACK_ENV)',) \
+    $(if $(LLAMA_STACK_ENV),--set-json ogx-ai.secrets='$(LLAMA_STACK_ENV)',) \
     $(if $(LLAMASTACK_CLIENT_PORT),--set llamastack.port=$(LLAMASTACK_CLIENT_PORT),) \
     $(if $(LLAMASTACK_API_KEY),--set llamastack.apiKey='$(LLAMASTACK_API_KEY)',) \
     $(if $(LLAMASTACK_OPENAI_BASE_PATH),--set llamastack.openaiBasePath='$(LLAMASTACK_OPENAI_BASE_PATH)',) \
@@ -195,11 +195,11 @@ helm_request_management_args = \
 
 helm_generic_args = \
 	$(if $(OTEL_EXPORTER_OTLP_ENDPOINT),--set otelExporter=$(OTEL_EXPORTER_OTLP_ENDPOINT),) \
-	$(if $(OTEL_EXPORTER_OTLP_ENDPOINT),--set llama-stack.otelExporter=$(OTEL_EXPORTER_OTLP_ENDPOINT),) \
-	$(if $(OTEL_EXPORTER_OTLP_ENDPOINT),--set-string llama-stack.secrets.OTEL_SERVICE_NAME=llamastack,) \
-	$(if $(findstring jaeger,$(OTEL_EXPORTER_OTLP_ENDPOINT)),--set-string llama-stack.secrets.OTEL_METRICS_EXPORTER=none,) \
-	$(if $(findstring jaeger,$(OTEL_EXPORTER_OTLP_ENDPOINT)),--set-string llama-stack.secrets.OTEL_LOGS_EXPORTER=none,) \
-	$(if $(findstring jaeger,$(OTEL_EXPORTER_OTLP_ENDPOINT)),--set-string llama-stack.secrets.OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf,) \
+	$(if $(OTEL_EXPORTER_OTLP_ENDPOINT),--set ogx-ai.otelExporter=$(OTEL_EXPORTER_OTLP_ENDPOINT),) \
+	$(if $(OTEL_EXPORTER_OTLP_ENDPOINT),--set-string ogx-ai.secrets.OTEL_SERVICE_NAME=ogx-ai,) \
+	$(if $(findstring jaeger,$(OTEL_EXPORTER_OTLP_ENDPOINT)),--set-string ogx-ai.secrets.OTEL_METRICS_EXPORTER=none,) \
+	$(if $(findstring jaeger,$(OTEL_EXPORTER_OTLP_ENDPOINT)),--set-string ogx-ai.secrets.OTEL_LOGS_EXPORTER=none,) \
+	$(if $(findstring jaeger,$(OTEL_EXPORTER_OTLP_ENDPOINT)),--set-string ogx-ai.secrets.OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf,) \
 	$(if $(OTEL_EXPORTER_OTLP_ENDPOINT),--set mcp-servers.mcp-servers.self-service-agent-snow.env.OTEL_EXPORTER_OTLP_ENDPOINT="$(OTEL_EXPORTER_OTLP_ENDPOINT)")
 
 helm_replica_count_args = \
@@ -1585,7 +1585,7 @@ define helm_install_common
 		"deploy/$(MAIN_CHART_NAME)-request-manager:request manager" \
 		"deploy/$(MAIN_CHART_NAME)-integration-dispatcher:integration dispatcher" \
 		"deploy/$(MAIN_CHART_NAME)-agent-service:agent service" \
-		"deploy/llamastack:llamastack" \
+		"deploy/ogx-ai:ogx-ai" \
 		"statefulset/pgvector:pgvector" \
 		"job/$(MAIN_CHART_NAME)-db-migration:db-migration" \
 		"job/$(MAIN_CHART_NAME)-init:init"; do \
@@ -1672,6 +1672,8 @@ helm-install-demo: namespace helm-depend deploy-email-server
 # Install with ticketing channel: Zammad deployed as a subchart of the main chart.
 # Bootstrap Job (post-install hook) seeds users, creates MCP agent token, patches secret,
 # and restarts dependent deployments — no separate token step required.
+# TODO: the ogx-ai.route override below duplicates pr-e2e-tests-ticket-flow.yml, which
+# pull_request_target loads from dev. Remove it once this branch is merged into dev.
 .PHONY: helm-install-ticketing
 helm-install-ticketing: namespace helm-depend
 	@echo "Step 1/3: Creating additional knowledge base ConfigMaps..."
@@ -1748,6 +1750,7 @@ helm-install-ticketing: namespace helm-depend
 		--timeout 25m \
 		--set mcp-servers.mcp-servers.zammad-mcp.enabled=true \
 		--set requestManagement.integrationDispatcher.externalAccess.enabled=false \
+		--set ogx-ai.route.enabled=false \
 		$(helm_ticketing_args) \
 		$(PROMPT_OVERRIDES),\
 		true)
@@ -2261,7 +2264,7 @@ deploy-nemo-guardrails: namespace
 	@helm upgrade --install nemo-guardrails $(NEMO_GUARDRAILS_CHART) \
 		-n $(NAMESPACE) \
 		$(if $(NGC_API_KEY),--set ngcApiKey=$(NGC_API_KEY),) \
-		--set llm.url=http://llamastack:8321/v1 \
+		--set llm.url=http://ogx-ai:8321/v1 \
 		--set llm.modelId=$(LLM_ID) \
 		$(if $(filter true,$(JAILBREAK_DETECT)),--set jailbreakDetect.enabled=true,) \
 		$(if $(SAFETY_TOLERATION),--set jailbreakDetect.gpuToleration=$(SAFETY_TOLERATION),)
