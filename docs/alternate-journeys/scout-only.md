@@ -481,10 +481,10 @@ for setting up guardrails then return to this flow.
 
 ---
 
-### Session level observability with Langfuse (optional)
+### Session level observability with MLflow (optional)
 
-Follow the same steps in the main [README.md](../../README.md#session-level-observability-with-langfuse-optional)
-for deploying and exploring session level observability with Langfuse.
+Follow the same steps in the main [README.md](../../README.md#session-level-observability-with-mlflow-optional)
+for deploying and exploring session level observability with MLflow.
 
 ---
 

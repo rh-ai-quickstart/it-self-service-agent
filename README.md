@@ -30,7 +30,7 @@ Transform IT service delivery using AI to lower support effort, improve complian
   - [Follow the flow with tracing](#follow-the-flow-with-tracing)
   - [Trying out smaller prompts](#trying-out-smaller-prompts)
   - [Setting up guardrails (optional)](#setting-up-guardrails-optional)
-  - [Session level observability with Langfuse (optional)](#session-level-observability-with-langfuse-optional)
+  - [Session level observability with MLflow (optional)](#session-level-observability-with-mlflow-optional)
   - [Post-run audit and evaluations (optional)](#post-run-audit-and-evaluations-optional)
   - [What you've accomplished](#what-youve-accomplished)
   - [Recommended next steps](#recommended-next-steps)
@@ -113,7 +113,7 @@ By the end of this quickstart, you will have:
 - (Optional) ServiceNow integration for real ticket creation
 - (Optional) Experience with different prompt configurations (big vs. multi-part prompts)
 - (Optional) NeMo Guardrails for prompt injection protection and content moderation
-- (Optional) Langfuse for session-level observability of multi-turn conversations
+- (Optional) MLflow for session-level observability of multi-turn conversations
 - Understanding of how to customize for your own use cases
 
 #### Key technologies you'll learn
@@ -343,8 +343,8 @@ The following are the resources you need to add on top of your existing OpenShif
 
 **Cluster Environment:**
 
-* **Testing Mode**: OpenShift/Kubernetes cluster (no special operators)
-* **Production Mode**: OpenShift 4.17.0+ cluster with OpenShift AI + [Serverless Operator](https://docs.openshift.com/serverless/latest/install/install-serverless-operator.html) + [Streams for Apache Kafka Operator](https://docs.redhat.com/en/documentation/red_hat_streams_for_apache_kafka/2.7/html/deploying_and_managing_streams_for_apache_kafka_on_openshift/operator-hub-str) + [Knative Eventing](https://docs.redhat.com/en/documentation/red_hat_openshift_serverless/1.35/html/installing_openshift_serverless/installing-knative-eventing) + [Knative Kafka w/ broker functionality enabled](https://docs.redhat.com/en/documentation/red_hat_openshift_serverless/1.35/html/installing_openshift_serverless/installing-knative-eventing#serverless-install-kafka-odc_installing-knative-eventing). Note that the `Streams for Apache Kafka Operator` can be installed cluster-wide (default) or be namespaced; if namespaced, install in the same namespace as the self-service agent.
+* **Testing Mode**: OpenShift/Kubernetes cluster. OpenShift with OpenShift AI 3.4+ required to explore observability in [Session level observability with MLflow (optional)](#session-level-observability-with-mlflow-optional).
+* **Production Mode**: OpenShift 4.17.0+ cluster with OpenShift AI 3.4+ + [Serverless Operator](https://docs.openshift.com/serverless/latest/install/install-serverless-operator.html) + [Streams for Apache Kafka Operator](https://docs.redhat.com/en/documentation/red_hat_streams_for_apache_kafka/2.7/html/deploying_and_managing_streams_for_apache_kafka_on_openshift/operator-hub-str) + [Knative Eventing](https://docs.redhat.com/en/documentation/red_hat_openshift_serverless/1.35/html/installing_openshift_serverless/installing-knative-eventing) + [Knative Kafka w/ broker functionality enabled](https://docs.redhat.com/en/documentation/red_hat_openshift_serverless/1.35/html/installing_openshift_serverless/installing-knative-eventing#serverless-install-kafka-odc_installing-knative-eventing). Note that the `Streams for Apache Kafka Operator` can be installed cluster-wide (default) or be namespaced; if namespaced, install in the same namespace as the self-service agent.
 
 Here's an example of a minimally required `KnativeKafka` CR that you can paste in for the CR when following the instructions for installing Knative Kafka w/broker functionality enabled -
 ```yaml
@@ -1664,98 +1664,98 @@ make undeploy-nemo-guardrails
 
 ---
 
-### Session level observability with Langfuse (optional)
+### Session level observability with MLflow (optional)
+
+Time to complete: 10-15 minutes
 
 The earlier section on OpenTelemetry integration showed you how to capture traces for each
-request/response turn in a conversation. However, viewing these individual traces doesn't easily
-show you the complete multi-turn conversation flow. This is where tools like
-[Langfuse](https://github.com/langfuse/langfuse) excel—they're specifically designed for
-session-level observability of complete conversations.
+request/response turn in a conversation. Viewing individual traces does not easily show the complete
+multi-turn conversation flow. The OpenShift AI integration with [MLflow](https://mlflow.org/) provides
+a way to review the turns together as conversation sessions.
 
-Ideally, these tools would consume the OpenTelemetry traces we're already collecting. Unfortunately,
-most session observability tools today require their own custom instrumentation.
-
-In the case of Langfuse, for example, while it uses OpenTelemetry to capture information, the
-application needs to be instrumented specifically for Langfuse to be able to view traces (or at least
-to do it easily).
-
-First, deploy with Langfuse enabled:
+First, deploy with MLflow enabled:
 
 ```bash
-export ENABLE_LANGFUSE=true
+export ENABLE_MLFLOW=true
 make helm-uninstall NAMESPACE=$NAMESPACE
 make helm-install-test NAMESPACE=$NAMESPACE
 ```
 
-You will notice that an additional link is provided once the deployment is completed.
-It will look something like this:
+When the deployment has completed, open the OpenShift console and select the nine-dot application
+launcher in the upper-right corner. Choose **MLflow** under **OpenShift Managed Services**. This opens
+the MLflow application.
 
-```
-Langfuse URL: https://self-service-agent-langfuse-{your cluster}
-```
+![OpenShift console application launcher with MLflow under OpenShift Managed Services](docs/images/mlflow-open-from-console.png)
 
-Follow that link, and you should see a login screen that looks like the following:
+Next use the "Select workspace" selection tool to set the namespace to which you have deployed:
 
+![MLflow workspace selector with the quickstart namespace selected](docs/images/mlflow-select-workspace.png)
 
-![Langfuse login](docs/images/langfuse-login.png)
+That will take you to the home page which should list self-service-agent-YYYYMMDD-HHMM as one of the recent experiments:
 
-Log in with
+![MLflow pages showing experiments](docs/images/mlflow-experiments.png)
 
-* **email:** admin@example.com
-* **password:** langgraph_password
+That experiment was created when you deployed the quickstart. Each time you deploy the quickstart a new experiment will be created.
+If you select the experiment for the self-service-agent you will see that there are no traces yet:
 
-and then select "Go to project" under the "Self Service Agent" organization:
+![MLflow workspace home page showing the self-service-agent experiment](docs/images/mlflow-experiment.png)
 
-![Langfuse organization](docs/images/langfuse-organization.png)
+Generate two sample conversations by running:
 
-At this point, you will see that there are zero traces. Next, generate two conversations
-so that we will be able to review the traces and sessions with:
-
-```
+```bash
 make generate-two-sessions
 ```
 
-Once the two conversations are generated, select the `Tracing` option under the Observability
-section:
+This target runs the conversation generator to create two sessions, one for each of the sample users
+Alice Johnson and Ahmed Hassan.
 
-![Langfuse traces](docs/images/langfuse-traces-1.png)
+Once the conversations are generated, return to the experiment and select **Traces** under **Observability**. The page shows traces for the
+individual turns in the generated conversations. To see the conversations as a whole, choose **Group
+by session** in the upper-right corner. Each session groups the traces from one conversation.
 
-You should now see a number of traces. Each of these traces will be for one of
-the turns in the multi-turn conversations.
+![MLflow traces grouped by session, with conversation turns expanded](docs/images/mlflow-traces-by-session.png)
 
-Select one of the traces. This will show you more detailed information
-for the trace including the LangGraph graph and the full message history
-up to the point where that trace was captured.
+You will see two sessions for each conversation. The first is with the routing agent,
+which selects the appropriate specialist. The second is with the specialist agent
+after the conversation is transferred.
 
-![Langfuse trace](docs/images/langfuse-tracing-2.png)
+You can see the turns for each session by clicking on the > symbol to the left of a trace:
 
-The information, however, will only be for one of the traces in the multi-turn
-conversation. Now, select the Sessions entry under the Observability section:
+![MLflow with turns for a session expanded](docs/images/mlflow-turns.png)
 
-![Langfuse sessions](docs/images/langfuse-sessions-1.png)
+You can see the details for a specific trace by selecting the oval with the turn name (for example turn 1):
 
-Of particular interest is that we can see which user a session was associated
-with as a quick way to find sessions that may be related to issues reported by end users.
 
-Select one of the sessions that has 4 traces in it. This will show you
-all of the traces associated with a multi-turn session and allow you to
-dig into the details for each of the traces. At this point,
-we have the full picture of the multi-turn conversation between the
-user and the agent!
+![MLflow showing the details for turn 1 in a session](docs/images/mlflow-turn1.png)
 
-![Langfuse session](docs/images/langfuse-sessions-2.png)
+From that page you can get even more detail by selecting View full trace and then selecting one
+of the Responses in the turn. That will show you the full details of the call that was made to
+the Responses API by the agent including the input message, tool calls, the output message
+and lots of other information:
 
-If you generate new conversations, traces will be shown in the UI in real-time
-so you can follow a "live" session if you are working with a user that is
-still interacting with the agent.
+![MLflow full trace view showing response details](docs/images/mlflow-full-trace.png)
 
-You can now explore the rest of the Langfuse UI to see what kinds of information
-you can get on conversations after they have run.
+Instead of using the traces view you can also go directly to the sessions using the sessions
+option under traces where you can also expand to see the turns:
 
-Once you are done, clean up by running:
+![MLflow sessions view with sessions expanded to show their turns](docs/images/mlflow-sessions.png)
 
-```
-export ENABLE_LANGFUSE=false
+If you generate new conversations, traces will be shown in the UI in real-time so you can
+follow a "live" session if you are working with a user that is still interacting with the agent.
+
+You can now experiment by drilling into the detail for the different sessions and associated traces.
+We think you will find that MLflow has done a good job of capturing all of the information for the
+sessions with the agent and making it available so you can review how the agent interacted on each ticket.
+
+One thing to note is that if you turn on the column for the User the user name will show as something like alice.johnson@company.com. This
+can help you find sessions for specific users:
+
+![MLflow sessions with user column enabled](docs/images/mlflow-session-with-user-column.png)
+
+Once you are done experimenting, you can clean up by running:
+
+```bash
+unset ENABLE_MLFLOW
 make helm-uninstall NAMESPACE=$NAMESPACE
 ```
 
@@ -1763,9 +1763,9 @@ make helm-uninstall NAMESPACE=$NAMESPACE
 ### Post-run audit and evaluations (optional)
 
 The section on evaluations provided insight on how to validate conversations
-as you develop and update the application. The section on Langfuse demonstrated
-how you can view either live or past conversations in a user interface to manually
-review them, likely when reported by an end user as being sub-optimal. The final
+as you develop and update the application. The section on MLflow demonstrated
+how you can review agent conversations in a user interface, for example when an
+end user reports a conversation as sub-optimal. The final
 step is to regularly audit and evaluate conversations to ensure real-life
 conversations are performing as expected.
 
@@ -1913,7 +1913,7 @@ By completing this quickstart, you have:
 - ✓ Configured email integration for asynchronous communication
 - ✓ Explored different prompt configurations (big vs. multi-part prompts)
 - ✓ Deployed NeMo Guardrails for prompt injection protection and content moderation
-- ✓ Deployed Langfuse for session-level observability of multi-turn conversations
+- ✓ Deployed MLflow for session-level observability of multi-turn conversations
 - ✓ Exported and evaluated conversations for post-run audit and evaluation of conversations
 
 ### Recommended next steps
