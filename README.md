@@ -1715,9 +1715,9 @@ by session** in the upper-right corner. Each session groups the traces from one 
 
 ![MLflow traces grouped by session, with conversation turns expanded](docs/images/mlflow-traces-by-session.png)
 
-You will see two sessions for each of the conversations. The first one is with the routing agent which
-determines which specialist agent the ticket should be routed to and the second one is the session
-with the specialist agent. 
+You will see two sessions for each conversation. The first is with the routing agent,
+which selects the appropriate specialist. The second is with the specialist agent
+after the conversation is transferred.
 
 You can see the turns for each session by clicking on the > symbol to the left of a trace:
 
@@ -1739,6 +1739,9 @@ Instead of using the traces view you can also go directly to the sessions using 
 option under traces where you can also expand to see the turns:
 
 ![MLflow sessions view with sessions expanded to show their turns](docs/images/mlflow-sessions.png)
+
+If you generate new conversations, traces will be shown in the UI in real-time so you can
+follow a "live" session if you are working with a user that is still interacting with the agent.
 
 You can now experiment by drilling into the detail for the different sessions and associated traces.
 We think you will find that MLflow has done a good job of capturing all of the information for the
