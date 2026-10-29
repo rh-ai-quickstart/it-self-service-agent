@@ -26,7 +26,7 @@ inputs:
   extra_helm_args:
     description: "Additional Helm arguments passed via EXTRA_HELM_ARGS"
     required: false
-    default: "--set requestManagement.networkPolicies.platform=kind --set requestManagement.requestManager.externalAccess.enabled=false --set requestManagement.integrationDispatcher.externalAccess.enabled=false"
+    default: "--set requestManagement.networkPolicies.platform=kind --set requestManagement.requestManager.externalAccess.enabled=false --set requestManagement.integrationDispatcher.externalAccess.enabled=false --set ogx-ai.route.enabled=false"
   use_pip_install:
     description: "Use pip install from requirements.txt instead of uv sync (default: false)"
     required: false
