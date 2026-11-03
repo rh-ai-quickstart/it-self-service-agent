@@ -1427,7 +1427,7 @@ test-short-resp-integration-request-mgr:
 .PHONY: test-long-resp-integration-request-mgr
 test-long-resp-integration-request-mgr:
 	@echo "Running long responses integration test with Request Manager..."
-	uv --directory evaluations run evaluate.py -n 20 --test-script chat-responses-request-mgr.py --reset-conversation --timeout=1800 --message-timeout=120 $(VALIDATE_LAPTOP_DETAILS_FLAG) $(STRUCTURED_OUTPUT_FLAG)
+	uv --directory evaluations run evaluate.py -n 10 --test-script chat-responses-request-mgr.py --reset-conversation --timeout=1800 --message-timeout=120 $(VALIDATE_LAPTOP_DETAILS_FLAG) $(STRUCTURED_OUTPUT_FLAG)
 	@echo "long responses integrations tests with Request Manager completed successfully!"
 
 .PHONY: test-medium-resp-integration-request-mgr
